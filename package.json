@@ -2,5 +2,11 @@
   "name": "seneca-loadbalance-transport",
   "author": "Maciej Małecki <me@mmalecki.com>",
   "version": "0.0.0",
+  "description": "Load balancing transport for Seneca",
+  "keywords": ["seneca"],
+  "repository": {
+    "url": "https://github.com/mmalecki/seneca-loadbalance-transport.git",
+    "type": "git"
+  },
   "license": "MIT"
 }
