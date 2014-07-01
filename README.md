@@ -3,7 +3,7 @@ Load balancing transport for [Seneca](http://senecajs.org).
 
 ## Usage
 ```js
-require(‘seneca’)()
+require('seneca')()
   .use('loadbalance-transport', {
     workers:[
       { type: 'tcp', port: 9000 },   // same options you would pass normally to a transport
