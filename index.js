@@ -12,19 +12,27 @@ function makeSeneca(worker) {
 module.exports = function (seneca, opts, cb) {
   var senecas = opts.workers.map(makeSeneca)
 
-  function wrapOne(args, cb_) {
+  function getWorker() {
+    var worker = senecas.shift()
+    senecas.push(worker)
+    return worker
   }
 
-  function wrapMany(args, cb_) {
+  function wrap(args, cb_) {
+    var worker = getWorker();
+    worker.act(args, function () {
+      console.dir(arguments)
+      cb_.apply(this, arguments)
+    });
   }
 
   var store = {
     name: name,
-    save: wrapOne,
-    load: wrapOne,
-    list: wrapMany,
-    remove: wrapMany,
-    close: wrapMany,
+    save: wrap,
+    load: wrap,
+    list: wrap,
+    remove: wrap,
+    close: wrap,
     native: function (cb_) {
       cb_(null, opts)
     }
