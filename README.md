@@ -7,8 +7,8 @@ require('seneca')()
   .use('loadbalance-transport', {
     workers:[
       { type: 'tcp', port: 9000 },   // same options you would pass normally to a transport
-      { type: 'tcp', port:9001 },
-      { type: 'http', port:9002 }, // transports do not have to be of same type
+      { type: 'tcp', port: 9001 },
+      { type: 'http', port: 9002 }, // transports do not have to be of same type
     ]
   })
   .client({ type: 'loadbalance' })
