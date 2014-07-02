@@ -3,10 +3,20 @@
   "author": "Maciej Małecki <me@mmalecki.com>",
   "version": "0.0.0",
   "description": "Load balancing transport for Seneca",
-  "keywords": ["seneca"],
+  "keywords": [
+    "seneca"
+  ],
   "repository": {
     "url": "https://github.com/mmalecki/seneca-loadbalance-transport.git",
     "type": "git"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "seneca": "^0.5.17"
+  },
+  "dependencies": {
+    "async": "^0.9.0",
+    "seneca-transport": "^0.1.2",
+    "shuffle-array": "0.0.0"
+  }
 }
