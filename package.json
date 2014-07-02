@@ -12,7 +12,7 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "seneca": "^0.5.17"
+    "seneca": "rjrodger/seneca#0.5.18"
   },
   "dependencies": {
     "async": "^0.9.0",

@@ -1,6 +1,7 @@
 'use strict'
 
 var Seneca = require('seneca')
+var shuffleArray = require('shuffle-array')
 
 var name = 'loadbalance-transport'
 
@@ -10,7 +11,7 @@ function makeSeneca(worker) {
 }
 
 module.exports = function (seneca, opts, cb) {
-  var senecas = opts.workers.map(makeSeneca)
+  var senecas = shuffleArray(opts.workers).map(makeSeneca)
 
   function getWorker() {
     var worker = senecas.shift()
