@@ -34,9 +34,17 @@ module.exports = function (opts, cb) {
 
   // Add a new worker.
   function addWorker(worker, cb) {
+    function ping() {
+      madeWorker.seneca.act({ role: 'transport', cmd: 'ping' }, function (err) {
+        worker.up = !(err && err.code === 'task-timeout')
+      })
+    }
+
     if (!worker.id) worker.id = nid()
-    workers.push(makeWorker(worker))
-    cb(null, worker.id)
+    var madeWorker = makeWorker(worker)
+    madeWorker.pingInterval = setInterval(ping, opts.pingInterval || 1000)
+    workers.push(madeWorker)
+    cb(null, madeWorker)
   }
 
   function listWorkers(cb) {
@@ -45,7 +53,8 @@ module.exports = function (opts, cb) {
 
   function removeWorker(id, cb) {
     for (var i = 0; i < workers.length; i++) {
-      if (workers.id === id) {
+      if (workers[i].id === id) {
+        clearInterval(workers[i].pingInterval)
         workers.splice(i, 1)
         return cb()
       }
