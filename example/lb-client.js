@@ -14,6 +14,9 @@ require('seneca')()
       seneca.act({ a: 1 }, function (err, out) {
         console.dir(arguments)
       })
+      seneca.act({ role: 'loadbalance', cmd: 'list' }, function (err, out) {
+        console.dir(arguments)
+      })
     }, 1000)
   })
   .client({ type: 'loadbalance-transport' })
