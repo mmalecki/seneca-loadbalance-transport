@@ -7,5 +7,9 @@ seneca
     this.add({ a: 1 }, function (args, done) {
       done(null, { b: 1 + args.a })
     })
+    this.add({ role: 'transport', cmd: 'ping' }, function (args, cb) {
+      // Silence errors about endpoint not found.
+      cb()
+    })
   })
   .listen({ type: type, port: port })
