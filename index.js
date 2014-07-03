@@ -83,6 +83,9 @@ module.exports = function (opts, cb) {
     transportUtils.make_client(makeSend, args, clientDone)
 
     function makeSend(spec, topic, sendDone) {
+      // `sendDone` gets a function which is used to send things over a
+      // transport. In reality, it just calls different instances of `seneca`
+      // we created, talking to different endpoints.
       sendDone(null, function (args_, done) {
         var worker = nextWorker()
         var nextSeneca = worker.seneca
