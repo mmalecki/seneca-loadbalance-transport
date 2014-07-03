@@ -1,46 +1,87 @@
 'use strict'
 
+var async = require('async')
+var nid = require('nid')
 var Seneca = require('seneca')
 var shuffleArray = require('shuffle-array')
 
 var name = 'loadbalance-transport'
 
-function makeSeneca(worker) {
-  return Seneca()
-    .client(worker)
-}
+module.exports = function (opts, cb) {
+  var seneca = this
+  var transportUtils = seneca.export('transport/utils')
+  var currentWorker = 0
+  var workers = []
 
-module.exports = function (seneca, opts, cb) {
-  var senecas = shuffleArray(opts.workers).map(makeSeneca)
+  async.each(opts.workers, addWorker)
 
-  function getWorker() {
-    var worker = senecas.shift()
-    senecas.push(worker)
-    return worker
-  }
-
-  function wrap(args, cb_) {
-    var worker = getWorker();
-    worker.act(args, function () {
-      console.dir(arguments)
-      cb_.apply(this, arguments)
-    });
-  }
-
-  var store = {
-    name: name,
-    save: wrap,
-    load: wrap,
-    list: wrap,
-    remove: wrap,
-    close: wrap,
-    native: function (cb_) {
-      cb_(null, opts)
+  // Make a worker and put it in our `workers` object
+  function makeWorker(worker) {
+    console.log('make worker')
+    return {
+      seneca: Seneca().client(worker),
+      id: worker.id,
+      up: true
     }
   }
 
-  seneca.store.init(seneca, opts, store, function (err, tag, description) {
-    if (err) return cb(err)
-    cb(null, { name: name, tag: tag })
-  })
+  // Lazily get/create the next seneca.
+  function nextWorker(cb) {
+    console.log('next worker')
+    var worker = workers[currentWorker++]
+    if (currentWorker >= workers.length) currentWorker = 0
+    if (!worker.up) return nextWorker()
+    return worker
+  }
+
+  // Add a new worker.
+  function addWorker(worker, cb) {
+    console.dir(arguments)
+    console.log('add worker')
+    if (!worker.id) worker.id = nid()
+    workers.push(makeWorker(worker))
+    cb(null, worker.id)
+  }
+
+  function listWorkers(cb) {
+    cb(null, workers)
+  }
+
+  function removeWorker(id, cb) {
+    for (var i = 0; i < workers.length; i++) {
+      if (workers.id === id) {
+        workers.splice(i, 1)
+        return cb()
+      }
+    }
+    cb(new Error('No such worker'))
+  }
+
+  function close(cb) {
+  }
+
+  function clientHook(args, clientDone) {
+    transportUtils.make_client(makeSend, args, clientDone)
+
+    function makeSend(spec, topic, sendDone) {
+      sendDone(null, function (args_, done) {
+        var nextSeneca = nextWorker().seneca
+        nextSeneca.act(args_, function () {
+          console.dir(arguments)
+          done.apply(this, arguments)
+        })
+      })
+    }
+  }
+
+  seneca.add(
+    { type: 'loadbalance-transport', role: 'transport', hook: 'client' },
+    clientHook
+  )
+
+  seneca.add({ role: 'loadbalance', cmd: 'add' }, addWorker)
+  seneca.add({ role: 'loadbalance', cmd: 'list' }, listWorkers)
+  seneca.add({ role: 'seneca', cmd: 'close' }, close)
+
+  cb(null, { name: name })
 }

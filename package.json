@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "async": "^0.9.0",
+    "nid": "^0.3.2",
     "seneca-transport": "^0.1.2",
     "shuffle-array": "0.0.0"
   }
