@@ -33,8 +33,9 @@ module.exports = function (opts, cb) {
     }
   }
 
-  // Lazily get/create the next seneca.
-  function nextWorker(cb) {
+  // Get the next worker, round-robin style.
+  // TODO: solve this with a pluggable solution
+  function nextWorker() {
     var worker = workers[currentWorker++]
     if (currentWorker >= workers.length) currentWorker = 0
     if (!worker.up) return nextWorker()
