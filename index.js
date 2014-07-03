@@ -45,6 +45,10 @@ module.exports = function (opts, cb) {
   // Add a new worker.
   function addWorker(worker, cb) {
     function ping() {
+      // A thing to keep in mind that right now it can take very long
+      // (I think default is 22222 ms) for a request to time out, even
+      // in scenarios like remote side breaking the connection and
+      // ECONNREFUSED on reconnect.
       madeWorker.seneca.act({ role: 'transport', cmd: 'ping' }, function (err) {
         worker.up = !(err && err.code === 'task-timeout')
       })
@@ -83,6 +87,7 @@ module.exports = function (opts, cb) {
         var worker = nextWorker()
         var nextSeneca = worker.seneca
         nextSeneca.act(args_, function () {
+          // See remark above about timing of timeouts for `act` requests.
           if (arguments[0] && arguments[0].code === 'task-timeout') {
             worker.up = false
             return done(arguments[0])
