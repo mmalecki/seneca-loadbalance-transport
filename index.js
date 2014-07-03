@@ -7,6 +7,15 @@ var shuffleArray = require('shuffle-array')
 
 var name = 'loadbalance-transport'
 
+// Skip properties we don't need to share (like interval ID).
+function serializeWorker(worker) {
+  return {
+    id: worker.id,
+    lastCallDuration: worker.lastCallDuration,
+    meanCallDuration: worker.meanCallDuration
+  }
+}
+
 module.exports = function (opts, cb) {
   var seneca = this
   var transportUtils = seneca.export('transport/utils')
@@ -47,8 +56,8 @@ module.exports = function (opts, cb) {
     cb(null, madeWorker)
   }
 
-  function listWorkers(cb) {
-    cb(null, workers)
+  function listWorkers(args, cb) {
+    cb(null, workers.map(serializeWorker))
   }
 
   function removeWorker(id, cb) {
