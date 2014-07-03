@@ -17,7 +17,6 @@ module.exports = function (opts, cb) {
 
   // Make a worker and put it in our `workers` object
   function makeWorker(worker) {
-    console.log('make worker')
     return {
       seneca: Seneca().client(worker),
       id: worker.id,
@@ -27,7 +26,6 @@ module.exports = function (opts, cb) {
 
   // Lazily get/create the next seneca.
   function nextWorker(cb) {
-    console.log('next worker')
     var worker = workers[currentWorker++]
     if (currentWorker >= workers.length) currentWorker = 0
     if (!worker.up) return nextWorker()
@@ -36,8 +34,6 @@ module.exports = function (opts, cb) {
 
   // Add a new worker.
   function addWorker(worker, cb) {
-    console.dir(arguments)
-    console.log('add worker')
     if (!worker.id) worker.id = nid()
     workers.push(makeWorker(worker))
     cb(null, worker.id)
@@ -65,9 +61,13 @@ module.exports = function (opts, cb) {
 
     function makeSend(spec, topic, sendDone) {
       sendDone(null, function (args_, done) {
-        var nextSeneca = nextWorker().seneca
+        var worker = nextWorker()
+        var nextSeneca = worker.seneca
         nextSeneca.act(args_, function () {
-          console.dir(arguments)
+          if (arguments[0] && arguments[0].code === 'task-timeout') {
+            worker.up = false
+            return done(arguments[0])
+          }
           done.apply(this, arguments)
         })
       })
