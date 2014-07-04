@@ -16,6 +16,7 @@ function isTaskTimeout(err) {
 function serializeWorker(worker) {
   return {
     id: worker.id,
+    up: worker.up,
     lastCallDuration: worker.lastCallDuration,
     meanCallDuration: worker.meanCallDuration
   }
