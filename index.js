@@ -41,8 +41,8 @@ module.exports = function (opts, cb) {
     }
   }
 
-  // Get the next worker, round-robin style.
-  // TODO: solve this with a pluggable solution
+  // Get the next worker by asking the `balance` hook for one. Default one is
+  // round robin, as implemented in `roundRobin`.
   function nextWorker(cb) {
     seneca.act('role:loadbalance,hook:balance', {
       workers: workers,
