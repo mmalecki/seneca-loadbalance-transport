@@ -25,7 +25,7 @@ function serializeWorker(worker) {
 module.exports = function (opts, cb) {
   var seneca = this
   var transportUtils = seneca.export('transport/utils')
-  var currentWorker = 0
+  var lastWorker = null
   var workers = []
 
   async.each(opts.workers, addWorker)
@@ -43,11 +43,24 @@ module.exports = function (opts, cb) {
 
   // Get the next worker, round-robin style.
   // TODO: solve this with a pluggable solution
-  function nextWorker() {
-    var worker = workers[currentWorker++]
+  function nextWorker(cb) {
+    seneca.act('role:loadbalance,hook:balance', {
+      workers: workers,
+      lastWorker: lastWorker
+    }, function (err, worker) {
+      if (!worker) return cb(new Error('No up backend found'))
+      lastWorker = worker
+      cb(null, worker)
+    })
+  }
+
+  function roundRobin(args, cb) {
+    var currentWorker = workers.indexOf(args.lastWorker)
+    currentWorker++
     if (currentWorker >= workers.length) currentWorker = 0
-    if (!worker.up) return nextWorker()
-    return worker
+    var worker = workers[currentWorker]
+    if (!worker.up) return roundRobin({ lastWorker: worker, workers: workers }, cb)
+    cb(null, worker)
   }
 
   // Add a new worker.
@@ -73,9 +86,9 @@ module.exports = function (opts, cb) {
     cb(null, workers.map(serializeWorker))
   }
 
-  function removeWorker(id, cb) {
+  function removeWorker(args, cb) {
     for (var i = 0; i < workers.length; i++) {
-      if (workers[i].id === id) {
+      if (workers[i].id === args.id) {
         clearInterval(workers[i].pingInterval)
         workers.splice(i, 1)
         return cb()
@@ -95,26 +108,27 @@ module.exports = function (opts, cb) {
       // transport. In reality, it just calls different instances of `seneca`
       // we created, talking to different endpoints.
       sendDone(null, function (args_, done) {
-        var worker = nextWorker()
-        var nextSeneca = worker.seneca
-        var startTime = Date.now()
+        nextWorker(function (err, worker) {
+          var nextSeneca = worker.seneca
+          var startTime = Date.now()
 
-        nextSeneca.act(args_, function (err) {
-          var callDuration = Date.now() - startTime
+          nextSeneca.act(args_, function (err_) {
+            var callDuration = Date.now() - startTime
 
-          // See remark above about timing of timeouts for `act` requests.
-          if (isTaskTimeout(err)) {
-            worker.up = false
-            return done(err)
-          }
+            // See remark above about timing of timeouts for `act` requests.
+            if (isTaskTimeout(err_)) {
+              worker.up = false
+              return done(err_)
+            }
 
-          // Grab some stats about this call (everything is ms)
-          worker.lastCallDuration = callDuration
-          worker.meanCallDuration = worker.meanCallDuration === -1
-            ? callDuration
-            : (worker.meanCallDuration + callDuration) / 2
+            // Grab some stats about this call (everything is ms)
+            worker.lastCallDuration = callDuration
+            worker.meanCallDuration = worker.meanCallDuration === -1
+              ? callDuration
+              : (worker.meanCallDuration + callDuration) / 2
 
-          done.apply(this, arguments)
+            done.apply(this, arguments)
+          })
         })
       })
     }
@@ -127,6 +141,8 @@ module.exports = function (opts, cb) {
 
   seneca.add({ role: 'loadbalance', cmd: 'add' }, addWorker)
   seneca.add({ role: 'loadbalance', cmd: 'list' }, listWorkers)
+  // Default load balacing hook is round robin.
+  seneca.add({ role: 'loadbalance', hook: 'balance' }, roundRobin)
   seneca.add({ role: 'seneca', cmd: 'close' }, close)
 
   cb(null, { name: name })
