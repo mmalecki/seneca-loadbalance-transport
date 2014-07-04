@@ -34,7 +34,9 @@ module.exports = function (opts, cb) {
     return {
       seneca: Seneca().client(worker),
       id: worker.id,
-      up: true
+      up: true,
+      lastCallDuration: -1,
+      meanCallDuration: -1
     }
   }
 
@@ -94,12 +96,23 @@ module.exports = function (opts, cb) {
       sendDone(null, function (args_, done) {
         var worker = nextWorker()
         var nextSeneca = worker.seneca
+        var startTime = Date.now()
+
         nextSeneca.act(args_, function (err) {
+          var callDuration = Date.now() - startTime
+
           // See remark above about timing of timeouts for `act` requests.
           if (isTaskTimeout(err)) {
             worker.up = false
             return done(err)
           }
+
+          // Grab some stats about this call (everything is ms)
+          worker.lastCallDuration = callDuration
+          worker.meanCallDuration = worker.meanCallDuration === -1
+            ? callDuration
+            : (worker.meanCallDuration + callDuration) / 2
+
           done.apply(this, arguments)
         })
       })
