@@ -7,6 +7,11 @@ var shuffleArray = require('shuffle-array')
 
 var name = 'loadbalance-transport'
 
+// Check whether an error is a `task-timeout`.
+function isTaskTimeout(err) {
+  return err && err.code === 'task-timeout'
+}
+
 // Skip properties we don't need to share (like interval ID).
 function serializeWorker(worker) {
   return {
@@ -50,7 +55,7 @@ module.exports = function (opts, cb) {
       // in scenarios like remote side breaking the connection and
       // ECONNREFUSED on reconnect.
       madeWorker.seneca.act({ role: 'transport', cmd: 'ping' }, function (err) {
-        worker.up = !(err && err.code === 'task-timeout')
+        worker.up = !isTaskTimeout(err)
       })
     }
 
@@ -89,11 +94,11 @@ module.exports = function (opts, cb) {
       sendDone(null, function (args_, done) {
         var worker = nextWorker()
         var nextSeneca = worker.seneca
-        nextSeneca.act(args_, function () {
+        nextSeneca.act(args_, function (err) {
           // See remark above about timing of timeouts for `act` requests.
-          if (arguments[0] && arguments[0].code === 'task-timeout') {
+          if (isTaskTimeout(err)) {
             worker.up = false
-            return done(arguments[0])
+            return done(err)
           }
           done.apply(this, arguments)
         })
