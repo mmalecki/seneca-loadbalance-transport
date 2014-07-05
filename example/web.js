@@ -19,7 +19,8 @@ seneca
         map: {
           add: { POST: true },
           list: { GET: true },
-          close: { POST: true }
+          close: { POST: true },
+          remove: { POST: true }
         }
       }
     })

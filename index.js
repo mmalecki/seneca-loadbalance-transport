@@ -141,6 +141,7 @@ module.exports = function (opts, cb) {
 
   seneca.add({ role: 'loadbalance', cmd: 'add' }, addWorker)
   seneca.add({ role: 'loadbalance', cmd: 'list' }, listWorkers)
+  seneca.add({ role: 'loadbalance', cmd: 'remove' }, removeWorker)
   // Default load balacing hook is round robin.
   seneca.add({ role: 'loadbalance', hook: 'balance' }, roundRobin)
   seneca.add({ role: 'seneca', cmd: 'close' }, close)
