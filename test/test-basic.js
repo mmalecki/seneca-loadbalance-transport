@@ -3,6 +3,7 @@ var Seneca = require('seneca')
 var startServer = require('./helpers/start-server.js')
 var ping = require('./helpers/ping.js')
 var calc = require('./helpers/calc.js')
+var testCalc = require('./helpers/test-calc.js')
 
 test('load balancing with a single worker', function (t) {
   startServer(function () {
@@ -17,9 +18,7 @@ test('load balancing with a single worker', function (t) {
       })
       .client({ type: 'loadbalance-transport' })
       .ready(function () {
-        seneca.act('role:calc,cmd:add', { a: 1, b: 1 }, function (err, res) {
-          if (err) return t.fail(err)
-          t.equal(res.result, 2)
+        testCalc(seneca, t, function () {
           t.end()
           process.exit()
         })
