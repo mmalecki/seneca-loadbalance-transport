@@ -33,7 +33,6 @@ test('load balancing with two workers', function (t) {
   // which remains static for the lifetime of the seneca object.
   function plugin() {
     ping(this)
-    calc(this)
     randomNumber(this)
   }
 
