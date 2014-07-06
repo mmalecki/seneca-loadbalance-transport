@@ -1,0 +1,12 @@
+<% layout('layout') -%>
+
+<h1>Workers</h1>
+
+<% workers.forEach(function (worker) { %>
+
+<h2><%= worker.id %></h2>
+Up: <%-worker.up%><br />
+Last call duration: <%-worker.lastCallDuration%><br />
+Mean call duration: <%-worker.meanCallDuration%><br />
+
+<% }); %>
