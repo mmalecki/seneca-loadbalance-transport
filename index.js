@@ -18,7 +18,9 @@ function serializeWorker(worker) {
     id: worker.id,
     up: worker.up,
     lastCallDuration: worker.lastCallDuration,
-    meanCallDuration: worker.meanCallDuration
+    meanCallDuration: worker.meanCallDuration,
+    host: worker.host,
+    port: worker.port
   }
 }
 
@@ -37,7 +39,9 @@ module.exports = function (opts, cb) {
       id: worker.id,
       up: true,
       lastCallDuration: -1,
-      meanCallDuration: -1
+      meanCallDuration: -1,
+      host: worker.host,
+      port: worker.port
     }
   }
 
