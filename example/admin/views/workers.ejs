@@ -5,6 +5,9 @@
 <% workers.forEach(function (worker) { %>
 
 <h2><%= worker.id %></h2>
+Type: <%-worker.type%><br />
+Host: <%-worker.host%><br />
+Port: <%-worker.port%><br />
 Up: <%-worker.up%><br />
 Last call duration: <%-worker.lastCallDuration%><br />
 Mean call duration: <%-worker.meanCallDuration%><br />

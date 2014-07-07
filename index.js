@@ -20,7 +20,8 @@ function serializeWorker(worker) {
     lastCallDuration: worker.lastCallDuration,
     meanCallDuration: worker.meanCallDuration,
     host: worker.host,
-    port: worker.port
+    port: worker.port,
+    type: worker.type
   }
 }
 
@@ -41,7 +42,8 @@ module.exports = function (opts, cb) {
       lastCallDuration: -1,
       meanCallDuration: -1,
       host: worker.host,
-      port: worker.port
+      port: worker.port,
+      type: worker.type
     }
   }
 
