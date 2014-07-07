@@ -85,6 +85,19 @@ seneca.ready(function () {
     })
   })
 
+  app.get('/remove', function (req, res) {
+    res.render('remove.ejs')
+  })
+
+  app.post('/remove', function (req, res) {
+    seneca.act('role:loadbalance,cmd:remove', {
+      id: req.body.id
+    }, function (err, args) {
+      if (err) res.send(500, err)
+      res.send(200)
+    })
+  })
+
   // create a HTTP server using the core Node API
   // this lets the admin plugin use web sockets
   var server = http.createServer(app)
