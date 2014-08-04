@@ -1,7 +1,7 @@
 {
   "name": "seneca-loadbalance-transport",
   "author": "Maciej Małecki <me@mmalecki.com>",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Load balancing transport for Seneca",
   "keywords": [
     "seneca"
