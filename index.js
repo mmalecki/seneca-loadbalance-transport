@@ -28,7 +28,7 @@ function serializeWorker(worker) {
 module.exports = function (opts, cb) {
   var seneca = this
   var transportUtils = seneca.export('transport/utils')
-  var lastWorker = null
+  var lastWorkerIndex = 0
   var workers = []
 
   async.each(opts.workers, addWorker)
@@ -52,23 +52,23 @@ module.exports = function (opts, cb) {
   function nextWorker(cb) {
     seneca.act('role:loadbalance,hook:balance', {
       workers: workers,
-      lastWorker: lastWorker
+      lastWorkerIndex: lastWorkerIndex
     }, function (err, worker) {
       if (!worker) return cb(new Error('No up backend found'))
-      lastWorker = worker
+      lastWorkerIndex = workers.indexOf(worker)
       cb(null, worker)
     })
   }
 
   function roundRobin(args, cb) {
-    var currentWorker = workers.indexOf(args.lastWorker)
+    var currentWorker = args.lastWorkerIndex
     currentWorker++
     if (currentWorker >= workers.length) currentWorker = 0
     var worker = workers[currentWorker]
     if (!worker.up) {
       var isAnyUp = workers.some(function (worker) { return worker.up })
       if (isAnyUp)
-        return roundRobin({ lastWorker: worker, workers: workers }, cb)
+        return roundRobin({ lastWorkerIndex: worker, workers: workers }, cb)
       else
         return cb(null, null)
     }
