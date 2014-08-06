@@ -65,7 +65,13 @@ module.exports = function (opts, cb) {
     currentWorker++
     if (currentWorker >= workers.length) currentWorker = 0
     var worker = workers[currentWorker]
-    if (!worker.up) return roundRobin({ lastWorker: worker, workers: workers }, cb)
+    if (!worker.up) {
+      var isAnyUp = workers.some(function (worker) { return worker.up })
+      if (isAnyUp)
+        return roundRobin({ lastWorker: worker, workers: workers }, cb)
+      else
+        return cb(null, null)
+    }
     cb(null, worker)
   }
 
