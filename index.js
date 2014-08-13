@@ -90,6 +90,7 @@ module.exports = function (opts, cb) {
     if (!worker.id) worker.id = nid()
     var madeWorker = makeWorker(worker)
     madeWorker.pingInterval = setInterval(ping, opts.pingInterval || 1000)
+    ping()
     workers.push(madeWorker)
     cb(null, madeWorker)
   }
