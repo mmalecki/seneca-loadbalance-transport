@@ -38,7 +38,7 @@ module.exports = function (opts, cb) {
     return {
       seneca: Seneca().client(worker),
       id: worker.id,
-      up: true,
+      up: undefined,
       lastCallDuration: -1,
       meanCallDuration: -1,
       host: worker.host,
