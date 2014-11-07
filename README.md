@@ -1,7 +1,38 @@
-# seneca-loadbalance-transport
-Load balancing transport for [Seneca](http://senecajs.org).
+seneca-loadbalance-transport - a [Seneca](http://senecajs.org) plugin
+=====================================================================
+
+## Seneca Load-Balance Transport Plugin
+
+This plugin provides a message transport that load balances accross a
+set of underlying message transports.
+
+[![Build Status](https://travis-ci.org/mmalecki/seneca-loadbalance-transport.png?branch=master)](https://travis-ci.org/mmalecki/seneca-loadbalance-transport)
+
+[![NPM](https://nodei.co/npm/seneca-loadbalance-transport.png)](https://nodei.co/npm/seneca-loadbalance-transport/)
+[![NPM](https://nodei.co/npm-dl/seneca-loadbalance-transport.png)](https://nodei.co/npm-dl/seneca-loadbalance-transport/)
+
+For a gentle introduction to Seneca itself, see the
+[senecajs.org](http://senecajs.org) site.
+
+Current Version: 0.1.0
+
+Tested on: Seneca 0.5.21, Node 0.10.31
+
+
+### Install
+
+To install use:
+
+```sh
+npm install seneca
+npm install seneca-loadbalance-transport
+```
+
+
+
 
 ## Usage
+
 ```js
 require('seneca')()
   .use('loadbalance-transport', {
@@ -25,6 +56,7 @@ require('seneca')()
 ```
 
 ## Acknowledgements
+
 This project was kindly sponsored by the awesome people at
 [nearForm](http://nearform.com) and is somewhat based on
 [`seneca-shard-store`](https://github.com/mcollina/seneca-shard-store).
