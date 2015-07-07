@@ -25,7 +25,7 @@ function serializeWorker(worker) {
   }
 }
 
-module.exports = function (opts, cb) {
+module.exports = function (opts) {
   var seneca = this
   var transportUtils = seneca.export('transport/utils')
   var lastWorker = null
@@ -83,7 +83,7 @@ module.exports = function (opts, cb) {
       // in scenarios like remote side breaking the connection and
       // ECONNREFUSED on reconnect.
       madeWorker.seneca.act({ role: 'transport', cmd: 'ping' }, function (err) {
-        worker.up = !isTaskTimeout(err)
+        madeWorker.up = !isTaskTimeout(err)
       })
     }
 
@@ -159,5 +159,5 @@ module.exports = function (opts, cb) {
   seneca.add({ role: 'loadbalance', hook: 'balance' }, roundRobin)
   seneca.add({ role: 'seneca', cmd: 'close' }, close)
 
-  cb(null, { name: name })
+  return { name: name };
 }
