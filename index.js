@@ -25,7 +25,7 @@ function serializeWorker(worker) {
   }
 }
 
-module.exports = function (opts, cb) {
+module.exports = function (opts) {
   var seneca = this
   var transportUtils = seneca.export('transport/utils')
   var lastWorker = null
@@ -76,14 +76,14 @@ module.exports = function (opts, cb) {
   }
 
   // Add a new worker.
-  function addWorker(worker, cb) {
+  function addWorker(worker) {
     function ping() {
       // A thing to keep in mind that right now it can take very long
       // (I think default is 22222 ms) for a request to time out, even
       // in scenarios like remote side breaking the connection and
       // ECONNREFUSED on reconnect.
       madeWorker.seneca.act({ role: 'transport', cmd: 'ping' }, function (err) {
-        worker.up = !isTaskTimeout(err)
+        madeWorker.up = !isTaskTimeout(err)
       })
     }
 
@@ -92,7 +92,6 @@ module.exports = function (opts, cb) {
     madeWorker.pingInterval = setInterval(ping, opts.pingInterval || 1000)
     ping()
     workers.push(madeWorker)
-    cb(null, madeWorker)
   }
 
   function listWorkers(args, cb) {
@@ -159,5 +158,5 @@ module.exports = function (opts, cb) {
   seneca.add({ role: 'loadbalance', hook: 'balance' }, roundRobin)
   seneca.add({ role: 'seneca', cmd: 'close' }, close)
 
-  cb(null, { name: name })
+  return { name: name };
 }
