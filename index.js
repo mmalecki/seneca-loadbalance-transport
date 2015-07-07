@@ -76,7 +76,7 @@ module.exports = function (opts) {
   }
 
   // Add a new worker.
-  function addWorker(worker) {
+  function addWorker(worker, cb) {
     function ping() {
       // A thing to keep in mind that right now it can take very long
       // (I think default is 22222 ms) for a request to time out, even
@@ -92,6 +92,7 @@ module.exports = function (opts) {
     madeWorker.pingInterval = setInterval(ping, opts.pingInterval || 1000)
     ping()
     workers.push(madeWorker)
+    cb(null, madeWorker)
   }
 
   function listWorkers(args, cb) {
